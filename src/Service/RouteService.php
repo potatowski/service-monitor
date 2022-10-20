@@ -14,7 +14,7 @@ class RouteService
         $this->routeRepository = $routeRepository;
     }
 
-    public function newRoute(array $params): Route
+    public function newRoute(array $params): array
     {
         $this->validSaveParams($params);
 
@@ -23,7 +23,7 @@ class RouteService
         $route->setUrl($params['url']);
         
         $this->routeRepository->add($route, true);
-        return $route;
+        return ['route' => $route->getId()];
     }
 
     private function validSaveParams(array $params): void
