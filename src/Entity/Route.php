@@ -6,7 +6,7 @@ use App\Repository\RouteRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-
+use Symfony\Component\Serializer\Annotation\Groups;
 /**
  * @ORM\Entity(repositoryClass=RouteRepository::class)
  */
@@ -16,21 +16,25 @@ class Route
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"route"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=40)
+     * @Groups({"route"})
      */
     private $name;
 
     /**
      * @ORM\Column(type="text")
+     * @Groups({"route"})
      */
     private $url;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Groups({"route"})
      */
     private $createAt;
 
