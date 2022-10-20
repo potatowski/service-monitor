@@ -43,6 +43,11 @@ class Route
      */
     private $registries;
 
+    public function onPreUpdate()
+    {
+        $this->setCreateAt(new \DateTime());
+    }
+
     public function __construct()
     {
         $this->registries = new ArrayCollection();

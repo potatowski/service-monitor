@@ -3,9 +3,11 @@
 namespace App\Controller\Api;
 
 use App\Entity\Route;
+use App\Service\RouteService;
 use App\Traiter\HttpStatusCodeExceptionTrait;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
@@ -50,6 +52,25 @@ class RouteController extends AbstractController
             }
             
             return $this->json($normalizer->normalize($route, null, ['groups' => 'route']));
+        } catch (\Exception $e) {
+            $code = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
+            return $this->json(['error' => $e->getMessage()], $code);
+        }
+    }
+
+    /**
+     * @Route("/api/route", name="new_route", methods={"POST"})
+     */
+    public function newRoute(
+        Request $request,
+        NormalizerInterface $normalizer,
+        RouteService $routeService
+    ): Response
+    {
+        try {
+            $params = json_decode($request->getContent() ?? [], true);
+            $data = $routeService->newRoute($params);
+            return $this->json($data);
         } catch (\Exception $e) {
             $code = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
             return $this->json(['error' => $e->getMessage()], $code);
