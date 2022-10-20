@@ -42,7 +42,7 @@ class RouteController extends AbstractController
     }
 
     /**
-     * @Route("/api/route/{route}", name="get_route", methods={"GET"})
+     * @Route("/{route}", name="get_route", methods={"GET"})
      */
     public function route(NormalizerInterface $normalizer, Route $route = null): Response
     {
@@ -77,7 +77,7 @@ class RouteController extends AbstractController
     }
 
     /**
-     * @Route("/api/route/{route}", name="update", methods={"PATCH"})
+     * @Route("/{route}", name="update", methods={"PATCH"})
      */
     public function editRoute(
         Request $request,
@@ -100,7 +100,7 @@ class RouteController extends AbstractController
     }
 
     /**
-     * @Route("/api/route/{route}", name="delete", methods={"DELETE"})
+     * @Route("/{route}", name="delete", methods={"DELETE"})
      */
     public function deleteRoute(
         RouteService $routeService,
