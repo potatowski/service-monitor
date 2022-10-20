@@ -32,7 +32,7 @@ class RouteController extends AbstractController
     public function routes(NormalizerInterface $normalizer): Response
     {
         try {
-            $routes = $this->managerRegistry->getRepository(Route::class)->findAll();
+            $routes = $this->managerRegistry->getRepository(Route::class)->findBy(['removed' => false], ['name' => 'ASC']);
             
             return $this->json($normalizer->normalize($routes, null, ['groups' => 'route']));
         } catch (\Exception $e) {
