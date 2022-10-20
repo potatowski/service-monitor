@@ -63,7 +63,6 @@ class RouteController extends AbstractController
      */
     public function newRoute(
         Request $request,
-        NormalizerInterface $normalizer,
         RouteService $routeService
     ): Response
     {
@@ -71,6 +70,29 @@ class RouteController extends AbstractController
             $params = json_decode($request->getContent() ?? [], true);
             $data = $routeService->newRoute($params);
             return $this->json($data, Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            $code = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
+            return $this->json(['error' => $e->getMessage()], $code);
+        }
+    }
+
+    /**
+     * @Route("/api/route/{route}", name="update", methods={"PATCH"})
+     */
+    public function editRoute(
+        Request $request,
+        RouteService $routeService,
+        Route $route = null
+    ): Response
+    {
+        try {
+            if (!$route) {
+                throw new \Exception('Route not found', Response::HTTP_NOT_FOUND);
+            }
+
+            $params = json_decode($request->getContent() ?? [], true);
+            $routeService->editRoute($route, $params);
+            return $this->json(null, Response::HTTP_NO_CONTENT);
         } catch (\Exception $e) {
             $code = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
             return $this->json(['error' => $e->getMessage()], $code);

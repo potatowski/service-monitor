@@ -39,6 +39,11 @@ class RouteRepository extends ServiceEntityRepository
         }
     }
 
+    public function flush(): void
+    {
+        $this->getEntityManager()->flush();
+    }
+
 //    /**
 //     * @return Route[] Returns an array of Route objects
 //     */

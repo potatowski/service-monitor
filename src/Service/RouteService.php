@@ -36,4 +36,32 @@ class RouteService
             throw new \Exception('Invalid url', Response::HTTP_BAD_REQUEST);
         }
     }
+
+    public function editRoute(Route $route, array $params): void
+    {
+        $this->validEditParams($params);
+
+        if (isset($params['name'])) {
+            $route->setName($params['name']);
+        }
+
+        if (isset($params['url'])) {
+            $route->setUrl($params['url']);
+        }
+        
+        try {
+            $this->routeRepository->flush();
+        } catch (\Exception $e) {
+            throw new \Exception('Error saving route', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return;
+    }
+
+    private function validEditParams(array $params): void
+    {
+        if (isset($params['url']) && !filter_var($params['url'], FILTER_VALIDATE_URL)) {
+            throw new \Exception('Invalid url', Response::HTTP_BAD_REQUEST);
+        }
+    }
 }
