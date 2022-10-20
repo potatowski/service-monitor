@@ -98,4 +98,25 @@ class RouteController extends AbstractController
             return $this->json(['error' => $e->getMessage()], $code);
         }
     }
+
+    /**
+     * @Route("/api/route/{route}", name="delete", methods={"DELETE"})
+     */
+    public function deleteRoute(
+        RouteService $routeService,
+        Route $route = null
+    ): Response
+    {
+        try {
+            if (is_null($route)) {
+                throw new \Exception('Route not found', Response::HTTP_NOT_FOUND);
+            }
+
+            $routeService->deleteRoute($route);
+            return $this->json(null, Response::HTTP_NO_CONTENT);
+        } catch (\Exception $e) {
+            $code = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
+            return $this->json(['error' => $e->getMessage()], $code);
+        }
+    }
 }

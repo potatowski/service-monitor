@@ -43,6 +43,11 @@ class Route
      */
     private $registries;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $removed = 0;
+
     public function onPreUpdate()
     {
         $this->setCreateAt(new \DateTime());
@@ -124,6 +129,18 @@ class Route
                 $registry->setRoute(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isRemoved(): ?bool
+    {
+        return $this->removed;
+    }
+
+    public function setRemoved(bool $removed): self
+    {
+        $this->removed = $removed;
 
         return $this;
     }

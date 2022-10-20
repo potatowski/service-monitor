@@ -30,9 +30,9 @@ class RouteRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(Route $entity, bool $flush = false): void
+    public function remove(Route $route, bool $flush = false): void
     {
-        $this->getEntityManager()->remove($entity);
+        $route->setRemoved(true);
 
         if ($flush) {
             $this->getEntityManager()->flush();

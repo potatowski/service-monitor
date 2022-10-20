@@ -64,4 +64,15 @@ class RouteService
             throw new \Exception('Invalid url', Response::HTTP_BAD_REQUEST);
         }
     }
+
+    public function deleteRoute(Route $route): void
+    {
+        try {
+            $this->routeRepository->remove($route, true);
+        } catch (\Exception $e) {
+            throw new \Exception('Error deleting route', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return;
+    }
 }
