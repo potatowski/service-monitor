@@ -70,7 +70,7 @@ class RouteController extends AbstractController
         try {
             $params = json_decode($request->getContent() ?? [], true);
             $data = $routeService->newRoute($params);
-            return $this->json($data);
+            return $this->json($data, Response::HTTP_CREATED);
         } catch (\Exception $e) {
             $code = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
             return $this->json(['error' => $e->getMessage()], $code);
