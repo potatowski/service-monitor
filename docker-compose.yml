@@ -37,10 +37,12 @@ services:
             - "4306:3306"
         volumes:
             - ./mysql:/var/lib/mysql
-        command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+        command: --default-authentication-plugin=mysql_native_password
         restart: always
         environment:
-            MYSQL_ROOT_PASSWORD: secret
-            MYSQL_PASSWORD: secret
+            MYSQL_DATABASE: monitoring
+            MYSQL_USER: service
+            MYSQL_PASSWORD: service
+            MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
         networks:
             - nginx-php74-mysql8
