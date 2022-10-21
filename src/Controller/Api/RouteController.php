@@ -2,18 +2,19 @@
 
 namespace App\Controller\Api;
 
-use App\Entity\Route;
+use App\Entity\Route as RouteEntity;
 use App\Service\RouteService;
 use App\Traiter\HttpStatusCodeExceptionTrait;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 
 /**
- * @Route("/api/route", name="api_route_")
+ * @Route("/api/route")
  */
 class RouteController extends AbstractController
 {
@@ -27,12 +28,12 @@ class RouteController extends AbstractController
     }
     
     /**
-     * @Route("", name="get_routes", methods={"GET"})
+     * @Route("", name="api_route_get_routes", methods={"GET"})
      */
     public function routes(NormalizerInterface $normalizer): Response
     {
         try {
-            $routes = $this->managerRegistry->getRepository(Route::class)->findBy(['removed' => false], ['name' => 'ASC']);
+            $routes = $this->managerRegistry->getRepository(RouteEntity::class)->findBy(['removed' => false], ['name' => 'ASC']);
             
             return $this->json($normalizer->normalize($routes, null, ['groups' => 'route']));
         } catch (\Exception $e) {
@@ -42,9 +43,9 @@ class RouteController extends AbstractController
     }
 
     /**
-     * @Route("/{route}", name="get_route", methods={"GET"})
+     * @Route("/{route}", name="api_route_get_route", methods={"GET"})
      */
-    public function route(NormalizerInterface $normalizer, Route $route = null): Response
+    public function route(NormalizerInterface $normalizer, RouteEntity $route = null): Response
     {
         try {
             if (!$route) {
@@ -59,7 +60,7 @@ class RouteController extends AbstractController
     }
 
     /**
-     * @Route("/api/route", name="new_route", methods={"POST"})
+     * @Route("/api/route", name="api_route_new_route", methods={"POST"})
      */
     public function newRoute(
         Request $request,
@@ -77,12 +78,12 @@ class RouteController extends AbstractController
     }
 
     /**
-     * @Route("/{route}", name="update", methods={"PATCH"})
+     * @Route("/{route}", name="api_route_update", methods={"PATCH"})
      */
     public function editRoute(
         Request $request,
         RouteService $routeService,
-        Route $route = null
+        RouteEntity $route = null
     ): Response
     {
         try {
@@ -100,11 +101,11 @@ class RouteController extends AbstractController
     }
 
     /**
-     * @Route("/{route}", name="delete", methods={"DELETE"})
+     * @Route("/{route}", name="api_route_delete", methods={"DELETE"})
      */
     public function deleteRoute(
         RouteService $routeService,
-        Route $route = null
+        RouteEntity $route = null
     ): Response
     {
         try {
