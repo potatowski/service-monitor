@@ -21,6 +21,7 @@ class RouteService
         $route = new Route();
         $route->setName($params['name']);
         $route->setUrl($params['url']);
+        $route->setCreateAt(new \DateTime());
         
         $this->routeRepository->add($route, true);
         return ['route' => $route->getId()];
@@ -32,6 +33,7 @@ class RouteService
             throw new \Exception('Invalid params', Response::HTTP_BAD_REQUEST);
         }
 
+        $params['url'] = str_contains($params['url'], 'http') ? $params['url'] : 'http://' . $params['url'];
         if (!filter_var($params['url'], FILTER_VALIDATE_URL)) {
             throw new \Exception('Invalid url', Response::HTTP_BAD_REQUEST);
         }
