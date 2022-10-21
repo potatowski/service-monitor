@@ -35,7 +35,7 @@ class RouteController extends AbstractController
         try {
             $routes = $this->managerRegistry->getRepository(RouteEntity::class)->findBy(['removed' => false], ['name' => 'ASC']);
             
-            return $this->json($normalizer->normalize($routes, null, ['groups' => 'route']));
+            return $this->json(['routes' => $normalizer->normalize($routes, null, ['groups' => 'route'])]);
         } catch (\Exception $e) {
             $code = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
             return $this->json(['error' => $e->getMessage()], $code);
@@ -60,7 +60,7 @@ class RouteController extends AbstractController
     }
 
     /**
-     * @Route("/api/route", name="api_route_new_route", methods={"POST"})
+     * @Route("", name="api_route_new", methods={"POST"})
      */
     public function newRoute(
         Request $request,
