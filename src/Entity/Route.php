@@ -144,4 +144,9 @@ class Route
 
         return $this;
     }
+
+    public function getLastRegistry(): ?Registry
+    {
+        return $this->registries->last() ? $this->registries->last() : null;
+    }
 }

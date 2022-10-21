@@ -4,14 +4,22 @@ namespace App\Service;
 
 use App\Entity\Route;
 use App\Repository\RouteRepository;
+use App\Service\CheckerRoute\RepeatStatus;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class RouteService
 {
     private $routeRepository;
-    public function __construct(RouteRepository $routeRepository)
+    private $client;
+
+    public function __construct(
+        RouteRepository $routeRepository,
+        HttpClientInterface $client
+    )
     {
         $this->routeRepository = $routeRepository;
+        $this->client = $client;
     }
 
     public function newRoute(array $params): array
@@ -76,5 +84,28 @@ class RouteService
         }
 
         return;
+    }
+
+    public function checkRoute(Route $route)
+    {
+        try {
+            $response = $this->client->request(
+                'GET',
+                $route->getUrl()
+            );
+
+            $routeResponse = new RouteResponse($response);
+            $lastRegistry = $route->getLastRegistry();
+            $repeatedStatus = 1;
+            if ($lastRegistry) {
+                if ($lastRegistry->getMessageIdetifier() === $routeResponse->getMessage()) {
+                    $repeatedStatus += $lastRegistry->getRepeatedStatus();
+                }
+            }
+
+            return array_merge($routeResponse->_toArray(), ['repeatedStatus' => $repeatedStatus]);
+        } catch (\Exception $e) {
+            throw new \Exception('Error checking route', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
