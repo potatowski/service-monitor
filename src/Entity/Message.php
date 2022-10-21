@@ -12,6 +12,10 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Message
 {
+    CONST MESSAGE_SUCESS = 'sucess';
+    CONST MESSAGE_LIMITED = 'limit';
+    CONST MESSAGE_FAILED = 'failed';
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -35,7 +39,7 @@ class Message
     private $content;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Registry::class, mappedBy="message")
+     * @ORM\OneToMany(targetEntity=Registry::class, mappedBy="message", orphanRemoval=true)
      */
     private $registries;
 
@@ -97,7 +101,7 @@ class Message
     {
         if (!$this->registries->contains($registry)) {
             $this->registries[] = $registry;
-            $registry->addMessage($this);
+            $registry->setMessage($this);
         }
 
         return $this;
@@ -106,7 +110,10 @@ class Message
     public function removeRegistry(Registry $registry): self
     {
         if ($this->registries->removeElement($registry)) {
-            $registry->removeMessage($this);
+            // set the owning side to null (unless already changed)
+            if ($registry->getMessage() === $this) {
+                $registry->setMessage(null);
+            }
         }
 
         return $this;

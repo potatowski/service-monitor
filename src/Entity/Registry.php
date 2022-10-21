@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\RegistryRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -18,11 +16,6 @@ class Registry
      * @ORM\Column(type="integer")
      */
     private $id;
-
-    /**
-     * @ORM\ManyToMany(targetEntity=Message::class, inversedBy="registries")
-     */
-    private $message;
 
     /**
      * @ORM\ManyToOne(targetEntity=Route::class, inversedBy="registries")
@@ -55,38 +48,15 @@ class Registry
      */
     private $timeExecution;
 
-    public function __construct()
-    {
-        $this->message = new ArrayCollection();
-    }
+    /**
+     * @ORM\ManyToOne(targetEntity=Message::class, inversedBy="registries")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $message;
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    /**
-     * @return Collection<int, Message>
-     */
-    public function getMessage(): Collection
-    {
-        return $this->message;
-    }
-
-    public function addMessage(Message $message): self
-    {
-        if (!$this->message->contains($message)) {
-            $this->message[] = $message;
-        }
-
-        return $this;
-    }
-
-    public function removeMessage(Message $message): self
-    {
-        $this->message->removeElement($message);
-
-        return $this;
     }
 
     public function getRoute(): ?Route
@@ -159,5 +129,22 @@ class Registry
         $this->timeExecution = $timeExecution;
 
         return $this;
+    }
+
+    public function getMessage(): ?Message
+    {
+        return $this->message;
+    }
+
+    public function setMessage(?Message $message): self
+    {
+        $this->message = $message;
+
+        return $this;
+    }
+
+    public function getMessageIdetifier(): ?string
+    {
+        return $this->message ? $this->message->getIdentifier() : null;
     }
 }
