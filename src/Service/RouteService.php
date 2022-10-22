@@ -86,7 +86,7 @@ class RouteService
         return;
     }
 
-    public function checkRoute(Route $route)
+    public function checkRoute(Route $route): array
     {
         try {
             $response = $this->client->request(

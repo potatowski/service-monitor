@@ -29,6 +29,17 @@ class RouteResponse
         $startTime = $response->getInfo('start_time');
         $this->httpStatusCode =  $response->getStatusCode();
         $this->timeExecution = round((microtime(true) - $startTime) * 1000);
+        
+        $message = Message::MESSAGE_SUCESS;
+        if ($this->timeExecution > self::MS_TO_LIMITED) {
+            $message = Message::MESSAGE_LIMITED;
+        }
+
+        if ($this->httpStatusCode >= Response::HTTP_INTERNAL_SERVER_ERROR) {
+            $message = Message::MESSAGE_FAILED;
+        }
+
+        $this->message = $message;
     }
 
     public static function defaultResponse(ResponseInterface $response)
@@ -103,7 +114,8 @@ class RouteResponse
             'httpStatusCode' => $this->httpStatusCode,
             'timeExecution' => $this->timeExecution,
             'copyUrl' => $this->copyUrl,
-            'repeatedStatus' => $this->repeatedStatus
+            'repeatedStatus' => $this->repeatedStatus,
+            'message' => $this->message
         ];
     }
 }
