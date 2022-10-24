@@ -51,4 +51,26 @@ class UserService
             throw new \Exception('Invalid password', Response::HTTP_BAD_REQUEST);
         }
     }
+
+    public function login(array $data): ?User
+    {
+        $this->validateLogin($data);
+        $user = $this->userRepository->findOneBy(['email' => $data['email']]);
+        if (!$user) {
+            throw new \Exception('User not found', Response::HTTP_NOT_FOUND);
+        }
+
+        if (!password_verify($data['password'], $user->getPassword())) {
+            throw new \Exception('Invalid password', Response::HTTP_BAD_REQUEST);
+        }
+
+        return $user;
+    }
+
+    public function validateLogin(array $data): void
+    {
+        if (!isset($data['email']) || !isset($data['password'])) {
+            throw new \Exception('Missing parameters', Response::HTTP_BAD_REQUEST);
+        }
+    }
 }
