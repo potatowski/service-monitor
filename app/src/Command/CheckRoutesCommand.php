@@ -45,7 +45,7 @@ class CheckRoutesCommand extends Command
         $routesConsulted = 0;
         $routesNotSave = 0;
         foreach ($routes as $route) {
-            $io->writeln($route->getName());
+            $io->writeln('Name: '. $route->getName());
             $data = $this->routeService->checkRoute($route);
 
             $registry = $this->registryService->newRegistry($route, $data);
