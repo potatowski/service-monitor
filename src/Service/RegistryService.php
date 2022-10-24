@@ -45,7 +45,6 @@ class RegistryService
 
             return $registry;
         } catch (\Exception $e) {
-            var_dump($e->getMessage());exit;
             return null;
         }
     }
