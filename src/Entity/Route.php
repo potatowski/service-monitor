@@ -48,6 +48,11 @@ class Route
      */
     private $removed = 0;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=RequestMethod::class, inversedBy="routes")
+     */
+    private $requestMethod;
+
     public function onPreUpdate()
     {
         $this->setCreateAt(new \DateTime());
@@ -86,6 +91,7 @@ class Route
 
     public function setUrl(string $url): self
     {
+        $url = str_contains($url, 'http') ? $url : 'http://' . $url;
         $this->url = $url;
 
         return $this;
@@ -148,5 +154,25 @@ class Route
     public function getLastRegistry(): ?Registry
     {
         return $this->registries->last() ? $this->registries->last() : null;
+    }
+
+    public function getRequestMethod(): ?RequestMethod
+    {
+        return $this->requestMethod;
+    }
+
+    public function setRequestMethod(?RequestMethod $requestMethod): self
+    {
+        $this->requestMethod = $requestMethod;
+
+        return $this;
+    }
+
+    /**
+     * @Groups({"route"})
+     */
+    public function getMethod(): ?string
+    {
+        return $this->getRequestMethod() ? $this->getRequestMethod()->getMethod() : 'GET';
     }
 }
