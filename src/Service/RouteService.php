@@ -2,23 +2,27 @@
 
 namespace App\Service;
 
+use App\Entity\RequestMethod;
 use App\Entity\Route;
+use App\Repository\RequestMethodRepository;
 use App\Repository\RouteRepository;
-use App\Service\CheckerRoute\RepeatStatus;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class RouteService
 {
     private $routeRepository;
+    private $requestMethodRepository;
     private $client;
 
     public function __construct(
         RouteRepository $routeRepository,
+        RequestMethodRepository $requestMethodRepository,
         HttpClientInterface $client
     )
     {
         $this->routeRepository = $routeRepository;
+        $this->requestMethodRepository = $requestMethodRepository;
         $this->client = $client;
     }
 
@@ -30,7 +34,15 @@ class RouteService
         $route->setName($params['name']);
         $route->setUrl($params['url']);
         $route->setCreateAt(new \DateTime());
+
+        $requestMethod = $this->requestMethodRepository->findOneBy(['method' => $params['method']]);
         
+        if (!$requestMethod) {
+            throw new \Exception('Request method not found', Response::HTTP_NOT_FOUND);
+        }
+
+        $route->setRequestMethod($requestMethod);
+
         $this->routeRepository->add($route, true);
         return ['route' => $route->getId()];
     }
@@ -45,6 +57,10 @@ class RouteService
         if (!filter_var($params['url'], FILTER_VALIDATE_URL)) {
             throw new \Exception('Invalid url', Response::HTTP_BAD_REQUEST);
         }
+
+        if (!isset($params['method']) || !in_array($params['method'], [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST, RequestMethod::METHOD_PUT, RequestMethod::METHOD_PATCH])) {
+            throw new \Exception('Invalid method', Response::HTTP_BAD_REQUEST);
+        }
     }
 
     public function editRoute(Route $route, array $params): void
@@ -58,6 +74,15 @@ class RouteService
         if (isset($params['url'])) {
             $route->setUrl($params['url']);
         }
+
+        if (isset($params['method'])) {
+            $requestMethod = $this->requestMethodRepository->findOneBy(['method' => $params['method']]);
+            if (!$requestMethod) {
+                throw new \Exception('Request method not found', Response::HTTP_NOT_FOUND);
+            }
+
+            $route->setRequestMethod($requestMethod);
+        }    
         
         try {
             $this->routeRepository->flush();
@@ -70,8 +95,13 @@ class RouteService
 
     private function validEditParams(array $params): void
     {
+        $params['url'] = str_contains($params['url'], 'http') ? $params['url'] : 'http://' . $params['url'];
         if (isset($params['url']) && !filter_var($params['url'], FILTER_VALIDATE_URL)) {
             throw new \Exception('Invalid url', Response::HTTP_BAD_REQUEST);
+        }
+
+        if (isset($params['method']) && !in_array($params['method'], [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST, RequestMethod::METHOD_PUT, RequestMethod::METHOD_PATCH])) {
+            throw new \Exception('Invalid method', Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -90,7 +120,7 @@ class RouteService
     {
         try {
             $response = $this->client->request(
-                'GET',
+                $route->getMethod(),
                 $route->getUrl()
             );
 
