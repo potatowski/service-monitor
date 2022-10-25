@@ -36,12 +36,16 @@ class RouteService
         $route->setCreateAt(new \DateTime());
 
         $requestMethod = $this->requestMethodRepository->findOneBy(['method' => $params['method']]);
-        
         if (!$requestMethod) {
             throw new \Exception('Request method not found', Response::HTTP_NOT_FOUND);
         }
-
         $route->setRequestMethod($requestMethod);
+
+        if (isset($params['hasToken']) && $params['hasToken']) {
+            $route->setHasToken($params['hasToken']);
+            $route->setToken($params['token']);
+            $route->setTypeToken($params['typeToken']);
+        }
 
         $this->routeRepository->add($route, true);
         return ['route' => $route->getId()];
@@ -60,6 +64,16 @@ class RouteService
 
         if (!isset($params['method']) || !in_array($params['method'], [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST, RequestMethod::METHOD_PUT, RequestMethod::METHOD_PATCH])) {
             throw new \Exception('Invalid method', Response::HTTP_BAD_REQUEST);
+        }
+
+        if (isset($params['hasToken']) && $params['hasToken']) {
+            if (!isset($params['typeToken']) || !isset($params['token'])) {
+                throw new \Exception('Invalid token', Response::HTTP_BAD_REQUEST);
+            }
+
+            if (!in_array($params['typeToken'], [Route::TYPE_TOKEN_BEARER, Route::TYPE_TOKEN_BASIC])) {
+                throw new \Exception('Invalid type token', Response::HTTP_BAD_REQUEST);
+            }
         }
     }
 
@@ -82,8 +96,19 @@ class RouteService
             }
 
             $route->setRequestMethod($requestMethod);
-        }    
+        }
         
+        if (isset($params['hasToken'])) {
+            $route->setHasToken($params['hasToken']);
+        }
+
+        if (isset($params['typeToken'])) {
+            $route->setTypeToken($params['typeToken']);
+        }
+
+        if (isset($params['token'])) {
+            $route->setToken($params['token']);
+        }
         try {
             $this->routeRepository->flush();
         } catch (\Exception $e) {
@@ -95,13 +120,25 @@ class RouteService
 
     private function validEditParams(array $params): void
     {
-        $params['url'] = str_contains($params['url'], 'http') ? $params['url'] : 'http://' . $params['url'];
-        if (isset($params['url']) && !filter_var($params['url'], FILTER_VALIDATE_URL)) {
-            throw new \Exception('Invalid url', Response::HTTP_BAD_REQUEST);
+        if (isset($params['url'])) {
+            $url = str_contains($params['url'], 'http') ? $params['url'] : 'http://' . $params['url'];
+            if (!filter_var($$url, FILTER_VALIDATE_URL)) {
+                throw new \Exception('Invalid url', Response::HTTP_BAD_REQUEST);
+            }
         }
 
         if (isset($params['method']) && !in_array($params['method'], [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST, RequestMethod::METHOD_PUT, RequestMethod::METHOD_PATCH])) {
             throw new \Exception('Invalid method', Response::HTTP_BAD_REQUEST);
+        }
+
+        if (isset($params['hasToken']) && $params['hasToken']) {
+            if (!isset($params['typeToken']) || !isset($params['token'])) {
+                throw new \Exception('Invalid token', Response::HTTP_BAD_REQUEST);
+            }
+
+            if (!in_array($params['typeToken'], [Route::TYPE_TOKEN_BEARER, Route::TYPE_TOKEN_BASIC])) {
+                throw new \Exception('Invalid type token', Response::HTTP_BAD_REQUEST);
+            }
         }
     }
 
@@ -119,16 +156,26 @@ class RouteService
     public function checkRoute(Route $route): array
     {
         try {
+            $dataAuth = [];
+            if ($route->getHasToken()) {
+                $dataAuth = [
+                    'headers' => [
+                        'Authorization' => $route->getAuthorization()
+                    ]
+                ];
+            }
+
             $response = $this->client->request(
                 $route->getMethod(),
-                $route->getUrl()
+                $route->getUrl(),
+                $dataAuth
             );
 
             $routeResponse = new RouteResponse($response);
             $lastRegistry = $route->getLastRegistry();
             $repeatedStatus = 1;
             if ($lastRegistry) {
-                if ($lastRegistry->getMessageIdetifier() === $routeResponse->getMessage()) {
+                if ($lastRegistry->getMessageIdetifier() == $routeResponse->getMessage()) {
                     $repeatedStatus += $lastRegistry->getRepeatedStatus();
                 }
             }
