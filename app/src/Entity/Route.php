@@ -12,6 +12,9 @@ use Symfony\Component\Serializer\Annotation\Groups;
  */
 class Route
 {
+    CONST TYPE_TOKEN_BEARER = 'Bearer';
+    CONST TYPE_TOKEN_BASIC = 'Basic';
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -53,6 +56,21 @@ class Route
      */
     private $requestMethod;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $hasToken = false;
+
+    /**
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $typeToken;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $token;
+
     public function onPreUpdate()
     {
         $this->setCreateAt(new \DateTime());
@@ -86,7 +104,7 @@ class Route
         if (str_contains($url, 'http://') || str_contains($url, 'https://')) {
             return $url;
         }
-        return 'http://' . $url;
+        return 'https://' . $url;
     }
 
     public function setUrl(string $url): self
@@ -174,5 +192,59 @@ class Route
     public function getMethod(): ?string
     {
         return $this->getRequestMethod() ? $this->getRequestMethod()->getMethod() : 'GET';
+    }
+
+    /**
+     * @Groups({"route"})
+     */
+    public function getHasToken(): ?bool
+    {
+        return $this->hasToken;
+    }
+
+    public function setHasToken(bool $hasToken): self
+    {
+        $this->hasToken = $hasToken;
+
+        return $this;
+    }
+
+    /**
+     * @Groups({"route"})
+     */
+    public function getTypeToken(): ?string
+    {
+        return $this->typeToken;
+    }
+
+    public function setTypeToken(?string $typeToken): self
+    {
+        $this->typeToken = $typeToken;
+
+        return $this;
+    }
+
+    /**
+     * @Groups({"route"})
+     */
+    public function getToken(): ?string
+    {
+        return $this->token;
+    }
+
+    public function setToken(?string $token): self
+    {
+        $this->token = $token;
+
+        return $this;
+    }
+
+    public function getAuthorization(): ?string
+    {
+        if ($this->getHasToken()) {
+            return $this->getTypeToken() . ' ' . $this->getToken();
+        }
+     
+        return null;
     }
 }

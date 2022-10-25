@@ -35,7 +35,7 @@ class RouteResponse
             $message = Message::MESSAGE_LIMITED;
         }
 
-        if ($this->httpStatusCode >= Response::HTTP_INTERNAL_SERVER_ERROR) {
+        if ($this->httpStatusCode >= Response::HTTP_BAD_REQUEST) {
             $message = Message::MESSAGE_FAILED;
         }
 
@@ -55,7 +55,7 @@ class RouteResponse
             $message = Message::MESSAGE_LIMITED;
         }
 
-        if ($statusCode >= Response::HTTP_INTERNAL_SERVER_ERROR) {
+        if ($statusCode >= Response::HTTP_BAD_REQUEST) {
             $message = Message::MESSAGE_FAILED;
         }
 
