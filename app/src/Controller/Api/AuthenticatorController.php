@@ -28,7 +28,7 @@ class AuthenticatorController extends AbstractController
             return $this->json($data, Response::HTTP_CREATED);
         } catch (\Exception $e) {
             $httpCode = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
-            return $this->json(['message' => $e->getMessage()], $httpCode);
+            return $this->json(['error' => $e->getMessage()], $httpCode);
         }
     }
 }
