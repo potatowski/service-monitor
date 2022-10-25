@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Registry;
+use App\Entity\Route;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -39,6 +40,26 @@ class RegistryRepository extends ServiceEntityRepository
         }
     }
 
+
+    public function getStatus(Route $route, \DateTime $now)
+    {
+        $qb = $this->createQueryBuilder('ry')
+            ->innerJoin('ry.route', 'r')
+            ->innerJoin('ry.message', 'm')
+            ->where('r.id = :route')
+            ->setParameter('route', $route->getId())
+            ->andWhere('ry.createAt >= :now')
+            ->setParameter('now', $now);
+ 
+            $qb->select("
+                SUM (CASE WHEN m.identifier = 'sucess' THEN 1 ELSE 0 END) as success,
+                SUM (CASE WHEN m.identifier = 'limited' THEN 1 ELSE 0 END) as limited,
+                SUM (CASE WHEN m.identifier = 'failed' THEN 1 ELSE 0 END) as failed,
+                COUNT(ry.id) as total
+            ");
+
+        return $qb->getQuery()->getOneOrNullResult();
+    }
 //    /**
 //     * @return Registry[] Returns an array of Registry objects
 //     */

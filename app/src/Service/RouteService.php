@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\RequestMethod;
 use App\Entity\Route;
+use App\Repository\RegistryRepository;
 use App\Repository\RequestMethodRepository;
 use App\Repository\RouteRepository;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,16 +15,19 @@ class RouteService
     private $routeRepository;
     private $requestMethodRepository;
     private $client;
+    private $registryRepository;
 
     public function __construct(
         RouteRepository $routeRepository,
         RequestMethodRepository $requestMethodRepository,
-        HttpClientInterface $client
+        HttpClientInterface $client,
+        RegistryRepository $registryRepository
     )
     {
         $this->routeRepository = $routeRepository;
         $this->requestMethodRepository = $requestMethodRepository;
         $this->client = $client;
+        $this->registryRepository = $registryRepository;
     }
 
     public function newRoute(array $params): array
@@ -184,5 +188,37 @@ class RouteService
         } catch (\Exception $e) {
             throw new \Exception('Error checking route', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public function getStatus(Route $route): array
+    {
+        $data = [];
+        $day = $this->registryRepository->getStatus($route, new \DateTime('-1 day'));
+        $week = $this->registryRepository->getStatus($route, new \DateTime('-7 days'));
+        $month = $this->registryRepository->getStatus($route, new \DateTime('-30 days'));
+
+        $data['day'] = $this->formatDataStatus($day);
+        $data['week'] = $this->formatDataStatus($week);
+        $data['month'] = $this->formatDataStatus($month);
+        return $data;
+    }
+
+    private function formatDataStatus(array $data)
+    {
+        $dataStatus = [
+            'success' => 0,
+            'limited' => 0,
+            'failed' => 0
+        ];
+
+        if ($data['total'] <= 0) {
+            return $dataStatus;
+        }
+
+        $dataStatus['success'] = round($data['success']*100/($data['total']),3);
+        $dataStatus['limited'] = round($data['limited']*100/($data['total']),3);
+        $dataStatus['failed'] = round($data['failed']*100/($data['total']),3);
+
+        return $dataStatus;
     }
 }

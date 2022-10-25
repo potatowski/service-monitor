@@ -120,4 +120,25 @@ class RouteController extends AbstractController
             return $this->json(['error' => $e->getMessage()], $code);
         }
     }
+
+    /**
+     * @Route("/{route}/status", name="api_route_status", methods={"GET"})
+     */
+    public function status(
+        RouteService $routeService,
+        RouteEntity $route = null
+    ): Response
+    {
+        try {
+            if (is_null($route)) {
+                throw new \Exception('Route not found', Response::HTTP_NOT_FOUND);
+            }
+
+            $data = $routeService->getStatus($route);
+            return $this->json($data);
+        } catch (\Exception $e) {
+            $code = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
+            return $this->json(['error' => $e->getMessage()], $code);
+        }
+    }
 }
