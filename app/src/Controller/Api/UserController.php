@@ -28,7 +28,7 @@ class UserController extends AbstractController
             return $this->json(['user' => $user->getId()], Response::HTTP_CREATED);
         } catch(\Exception $e) {
             $code = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
-            return $this->json(['message' => $e->getMessage()], $code);
+            return $this->json(['error' => $e->getMessage()], $code);
         }
     }
 }

@@ -44,6 +44,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $status = self::STATUS_ENABLED;
 
+    /**
+     * @ORM\Column(type="string", length=30)
+     */
+    private $name;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -140,6 +145,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setStatus(bool $status): self
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): self
+    {
+        $this->name = $name;
 
         return $this;
     }

@@ -40,6 +40,10 @@ class UserService
             throw new \Exception('Invalid email', Response::HTTP_BAD_REQUEST);
         }
 
+        $user = $this->userRepository->findOneBy(['email' => $email]);
+        if ($user) {
+            throw new \Exception('Email already exists', Response::HTTP_BAD_REQUEST);
+        }
         
         $password = $data['password'];
         $uppercase = preg_match('@[A-Z]@', $password);
