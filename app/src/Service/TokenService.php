@@ -49,7 +49,6 @@ class TokenService
 
             return $data;
         } catch (\Exception $e) {
-            var_dump($e->getMessage());exit;
             throw new \Exception('Error generating token', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
