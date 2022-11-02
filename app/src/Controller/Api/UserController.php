@@ -17,7 +17,7 @@ class UserController extends AbstractController
     use HttpStatusCodeExceptionTrait;
 
     /**
-     * @Route("", name="api_user_create", methods={"POST"})
+     * @Route("/create", name="api_user_create", methods={"POST"})
      */
     public function createUser(Request $request, UserService $userService): Response
     {
