@@ -1,0 +1,329 @@
+FORMAT: 1A
+HOST: http://localhost:8080/api
+
+# Service Monitor
+This is a project open source with an API with REST concepts to check if websites and API's are ok with a systemd or crontab using a CLI to monitoring routes registered in application
+
+
+# Authentication [POST /auth]
+
++ Request (application/json)
+
+        {
+            "email": "testtest@test.com",
+            "password": "i2e4e48@A"
+        }
+
++ Response 201 (application/json)
+
+        {
+            "userId": 01,
+            "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InRlc3RlQHRlc3RlLmNvbSIsInVzZXJfaWQiOjEsImV4cCI6MTYzMjQ1MzI3My43MDEyOTJ9.1xec7esftFu0yc1G3y-90I9rXrW9BaiGql921VMftSE",
+            "expire": 959804400
+        }
+
++ Response 400 (application/json)
+
+        {
+            "error": "Missing parameters"
+        }
+
++ Response 400 (application/json)
+
+        {
+            "error": "Invalid password"
+        }
+
++ Response 404 (application/json)
+
+        {
+            "error": "User not found"
+        }
+
++ Response 500 (application/json)
+
+        {
+            "error": "Error generating token"
+        }
+
+# User [/user]
+
+## Create User [POST /user/create]
+
++ Request (application/json)
+
+        {
+            "name": "Vitor",
+            "email": "testtest@test.com",
+            "password": "i2e4e48@A"
+        }
+
++ Response 200 (application/json)
+
+        {
+            "user": 1
+        }
+
++ Response 400 (application/json)
+
+        {
+            "error": "Missing parameters"
+        }
+        
++ Response 400 (application/json)
+
+        {
+            "error": "Invalid email"
+        }
+
++ Response 400 (application/json)
+
+        {
+            "error": "Email already exists"
+        }
+
++ Response 400 (application/json)
+
+        {
+            "error": "Invalid password"
+        }
+        
+# Route [/route]
+
+## List routes [GET /route]
+
++ Request (application/json)
+    
+    + Headers
+    
+            Authorization: Bearer token
+    
++ Response 200 (application/json)
+
+        {
+            "routes": [
+                {
+                    "id": 1,
+                    "name": "test",
+                    "url": "https://test.com.br",
+                    "createAt": "2022-10-24T23:27:42+00:00",
+                    "hasToken": false,
+                    "typeToken": null,
+                    "token": null,
+                    "method": "GET"
+                }
+            ]
+        }
+
++ Response 200 (application/json)
+
+        {
+            "routes": []
+        }
+
+## Get route status [GET /route/{route_id}/status]
+
++ Request (application/json)
+    
+    + Headers
+    
+            Authorization: Bearer token
+
++ Response 200 (application/json)
+
+        {
+            "day": {
+                "success": 100.00,
+                "limited": 0.00,
+                "failed": 0.00
+            },
+            "week": {
+                "success": 97.00,
+                "limited": 2.00,
+                "failed": 1.00
+            },
+            "month": {
+                "success": 90.00,
+                "limited": 9.00,
+                "failed": 1.00
+            }
+        }
+
++ Response 404 (application/json)
+
+        {
+            "error": "Route not found"
+        }
+
+## Create route [POST /route]
++ Request (application/json)
+    
+    + Headers
+    
+            Authorization: Bearer token
+    
+    + Body
+
+            {
+                "name": "teste",
+                "url": "test.com.br",
+                "method": "GET",
+                "hasToken": true,
+                "typeToken": "Basic",
+                "token": "dGVzdDp0ZXN0"
+            }
+
++ Response 200 (application/json)
+
+        {
+            "route": 1
+        }
+
++ Response 400 (application/json)
+
+        {
+            "error": "Invalid params"
+        }
+        
++ Response 400 (application/json)
+
+        {
+            "error": "Invalid url"
+        }
+        
++ Response 400 (application/json)
+
+        {
+            "error": "Invalid method"
+        }
+
++ Response 400 (application/json)
+
+        {
+            "error": "Invalid token"
+        }
+
++ Response 400 (application/json)
+
+        {
+            "error": "Invalid type token"
+        }
+        
++ Response 404 (application/json)
+
+        {
+            "error": "Request method not found"
+        }
+
+## Get route [GET /route/{route_id}]
+
++ Request (application/json)
+    
+    + Headers
+    
+            Authorization: Bearer token
+
++ Response 200 (application/json)
+
+        {
+            "id": 1,
+            "name": "test",
+            "url": "http://google.com.br",
+            "createAt": "2022-10-21T20:08:49+00:00",
+            "hasToken": false,
+            "typeToken": null,
+            "token": null,
+            "method": "GET"
+        }
+
++ Response 404 (application/json)
+
+        {
+            "error": "Route not found"
+        }
+        
+## Edit route [PATCH /route/{route_id}]
+
++ Request (application/json)
+    
+    + Headers
+    
+            Authorization: Bearer token
+
+    + Body
+
+            {
+                "name": "test",
+                "url": "http://google.com.br",
+                "hasToken": false,
+                "typeToken": null,
+                "token": null,
+                "method": "GET"
+            }
+
++ Response 204 (application/json)
+
+
++ Response 400 (application/json)
+
+        {
+            "error": "Invalid url"
+        }
+        
++ Response 400 (application/json)
+
+        {
+            "error": "Invalid method"
+        }
+
++ Response 400 (application/json)
+
+        {
+            "error": "Invalid token"
+        }
+
++ Response 400 (application/json)
+
+        {
+            "error": "Invalid type token"
+        }
+        
++ Response 404 (application/json)
+
+        {
+            "error": "Request method not found"
+        }
+
++ Response 404 (application/json)
+
+        {
+            "error": "Route not found"
+        }
+
++ Response 500 (application/json)
+
+        {
+            "error": "Error saving route"
+        }
+
+## Delete route [DELETE /route/{route_id}]
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: Bearer token
+
++ Response 204 (application/json)
+
++ Response 404 (application/json)
+
+        {
+            "error": "Route not found"
+        }
+
++ Response 500 (application/json)
+
+        {
+            "error": "Error deleting route"
+        }
