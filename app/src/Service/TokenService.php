@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\User;
+use App\Exception\ResponseException;
 use App\Repository\UserRepository;
 use Lcobucci\Clock\FrozenClock;
 use Lcobucci\JWT\Configuration;
@@ -49,7 +50,7 @@ class TokenService
 
             return $data;
         } catch (\Exception $e) {
-            throw new \Exception('Error generating token', Response::HTTP_INTERNAL_SERVER_ERROR);
+            throw new ResponseException('Error generating token', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
     
@@ -57,7 +58,7 @@ class TokenService
     {
         list($type, $token) = $token;
         if ($type != "Bearer") {
-            throw new \Exception('Not contain a Bearer Token', Response::HTTP_FORBIDDEN);
+            throw new ResponseException('Not contain a Bearer Token', Response::HTTP_FORBIDDEN);
         }
         
         if($user = $this->unencryptedToken($token)){
@@ -80,13 +81,13 @@ class TokenService
             $clock = new FrozenClock(new \DateTimeImmutable('now'));
             $constraint = new LooseValidAt($clock);
             if(!$config->validator()->validate($token, $constraint)) {
-                throw new \Exception('Token expired');
+                throw new ResponseException('Token expired');
             }
 
             $userId = $token->claims()->get('user_id') ?? $token->claims()->get('merchant_id');
             $user = $this->userRepository->findOneBy(['id' => $userId]);
             if (is_null($user)) {
-                throw new \Exception('User not found', Response::HTTP_NOT_FOUND);
+                throw new ResponseException('User not found', Response::HTTP_NOT_FOUND);
             }
 
             return $user;

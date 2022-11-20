@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\Route as RouteEntity;
+use App\Exception\ResponseException;
 use App\Service\RouteService;
 use App\Traiter\HttpStatusCodeExceptionTrait;
 use Doctrine\Persistence\ManagerRegistry;
@@ -49,11 +50,12 @@ class RouteController extends AbstractController
     {
         try {
             if (!$route) {
-                throw new \Exception('Route not found', Response::HTTP_NOT_FOUND);
+                throw new ResponseException('Route not found', Response::HTTP_NOT_FOUND);
             }
             
             return $this->json($normalizer->normalize($route, null, ['groups' => 'route']));
         } catch (\Exception $e) {
+            if ($e instanceof ResponseException) return $e->getResponse();
             $code = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
             return $this->json(['error' => $e->getMessage()], $code);
         }
@@ -88,13 +90,14 @@ class RouteController extends AbstractController
     {
         try {
             if (!$route) {
-                throw new \Exception('Route not found', Response::HTTP_NOT_FOUND);
+                throw new ResponseException('Route not found', Response::HTTP_NOT_FOUND);
             }
 
             $params = json_decode($request->getContent() ?? [], true);
             $routeService->editRoute($route, $params);
             return $this->json(null, Response::HTTP_NO_CONTENT);
         } catch (\Exception $e) {
+            if ($e instanceof ResponseException) return $e->getResponse();
             $code = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
             return $this->json(['error' => $e->getMessage()], $code);
         }
@@ -110,12 +113,13 @@ class RouteController extends AbstractController
     {
         try {
             if (is_null($route)) {
-                throw new \Exception('Route not found', Response::HTTP_NOT_FOUND);
+                throw new ResponseException('Route not found', Response::HTTP_NOT_FOUND);
             }
 
             $routeService->deleteRoute($route);
             return $this->json(null, Response::HTTP_NO_CONTENT);
         } catch (\Exception $e) {
+            if ($e instanceof ResponseException) return $e->getResponse();
             $code = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
             return $this->json(['error' => $e->getMessage()], $code);
         }
@@ -131,12 +135,13 @@ class RouteController extends AbstractController
     {
         try {
             if (is_null($route)) {
-                throw new \Exception('Route not found', Response::HTTP_NOT_FOUND);
+                throw new ResponseException('Route not found', Response::HTTP_NOT_FOUND);
             }
 
             $data = $routeService->getStatus($route);
             return $this->json($data);
         } catch (\Exception $e) {
+            if ($e instanceof ResponseException) return $e->getResponse();
             $code = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
             return $this->json(['error' => $e->getMessage()], $code);
         }

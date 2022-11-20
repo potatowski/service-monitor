@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\RequestMethod;
 use App\Entity\Route;
+use App\Exception\ResponseException;
 use App\Repository\RegistryRepository;
 use App\Repository\RequestMethodRepository;
 use App\Repository\RouteRepository;
@@ -41,7 +42,7 @@ class RouteService
 
         $requestMethod = $this->requestMethodRepository->findOneBy(['method' => $params['method']]);
         if (!$requestMethod) {
-            throw new \Exception('Request method not found', Response::HTTP_NOT_FOUND);
+            throw new ResponseException('Request method not found', Response::HTTP_NOT_FOUND);
         }
         $route->setRequestMethod($requestMethod);
 
@@ -58,25 +59,25 @@ class RouteService
     private function validSaveParams(array $params): void
     {
         if (!isset($params['name']) || !isset($params['url'])) {
-            throw new \Exception('Invalid params', Response::HTTP_BAD_REQUEST);
+            throw new ResponseException('Invalid params', Response::HTTP_BAD_REQUEST);
         }
 
         $params['url'] = str_contains($params['url'], 'http') ? $params['url'] : 'http://' . $params['url'];
         if (!filter_var($params['url'], FILTER_VALIDATE_URL)) {
-            throw new \Exception('Invalid url', Response::HTTP_BAD_REQUEST);
+            throw new ResponseException('Invalid url', Response::HTTP_BAD_REQUEST);
         }
 
         if (!isset($params['method']) || !in_array($params['method'], [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST, RequestMethod::METHOD_PUT, RequestMethod::METHOD_PATCH])) {
-            throw new \Exception('Invalid method', Response::HTTP_BAD_REQUEST);
+            throw new ResponseException('Invalid method', Response::HTTP_BAD_REQUEST);
         }
 
         if (isset($params['hasToken']) && $params['hasToken']) {
             if (!isset($params['typeToken']) || !isset($params['token'])) {
-                throw new \Exception('Invalid token', Response::HTTP_BAD_REQUEST);
+                throw new ResponseException('Invalid token', Response::HTTP_BAD_REQUEST);
             }
 
             if (!in_array($params['typeToken'], [Route::TYPE_TOKEN_BEARER, Route::TYPE_TOKEN_BASIC])) {
-                throw new \Exception('Invalid type token', Response::HTTP_BAD_REQUEST);
+                throw new ResponseException('Invalid type token', Response::HTTP_BAD_REQUEST);
             }
         }
     }
@@ -96,7 +97,7 @@ class RouteService
         if (isset($params['method'])) {
             $requestMethod = $this->requestMethodRepository->findOneBy(['method' => $params['method']]);
             if (!$requestMethod) {
-                throw new \Exception('Request method not found', Response::HTTP_NOT_FOUND);
+                throw new ResponseException('Request method not found', Response::HTTP_NOT_FOUND);
             }
 
             $route->setRequestMethod($requestMethod);
@@ -116,7 +117,7 @@ class RouteService
         try {
             $this->routeRepository->flush();
         } catch (\Exception $e) {
-            throw new \Exception('Error saving route', Response::HTTP_INTERNAL_SERVER_ERROR);
+            throw new ResponseException('Error saving route', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return;
@@ -127,21 +128,21 @@ class RouteService
         if (isset($params['url'])) {
             $url = str_contains($params['url'], 'http') ? $params['url'] : 'http://' . $params['url'];
             if (!filter_var($$url, FILTER_VALIDATE_URL)) {
-                throw new \Exception('Invalid url', Response::HTTP_BAD_REQUEST);
+                throw new ResponseException('Invalid url', Response::HTTP_BAD_REQUEST);
             }
         }
 
         if (isset($params['method']) && !in_array($params['method'], [RequestMethod::METHOD_GET, RequestMethod::METHOD_POST, RequestMethod::METHOD_PUT, RequestMethod::METHOD_PATCH])) {
-            throw new \Exception('Invalid method', Response::HTTP_BAD_REQUEST);
+            throw new ResponseException('Invalid method', Response::HTTP_BAD_REQUEST);
         }
 
         if (isset($params['hasToken']) && $params['hasToken']) {
             if (!isset($params['typeToken']) || !isset($params['token'])) {
-                throw new \Exception('Invalid token', Response::HTTP_BAD_REQUEST);
+                throw new ResponseException('Invalid token', Response::HTTP_BAD_REQUEST);
             }
 
             if (!in_array($params['typeToken'], [Route::TYPE_TOKEN_BEARER, Route::TYPE_TOKEN_BASIC])) {
-                throw new \Exception('Invalid type token', Response::HTTP_BAD_REQUEST);
+                throw new ResponseException('Invalid type token', Response::HTTP_BAD_REQUEST);
             }
         }
     }
@@ -151,7 +152,7 @@ class RouteService
         try {
             $this->routeRepository->remove($route, true);
         } catch (\Exception $e) {
-            throw new \Exception('Error deleting route', Response::HTTP_INTERNAL_SERVER_ERROR);
+            throw new ResponseException('Error deleting route', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return;
@@ -186,7 +187,7 @@ class RouteService
 
             return array_merge($routeResponse->_toArray(), ['repeatedStatus' => $repeatedStatus]);
         } catch (\Exception $e) {
-            throw new \Exception('Error checking route', Response::HTTP_INTERNAL_SERVER_ERROR);
+            throw new ResponseException('Error checking route', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
