@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use App\Exception\ResponseException;
 use App\Service\TokenService;
 use App\Service\UserService;
 use App\Traiter\HttpStatusCodeExceptionTrait;
@@ -27,6 +28,7 @@ class AuthenticatorController extends AbstractController
 
             return $this->json($data, Response::HTTP_CREATED);
         } catch (\Exception $e) {
+            if ($e instanceof ResponseException) return $e->getResponse();
             $httpCode = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
             return $this->json(['error' => $e->getMessage()], $httpCode);
         }

@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\User;
+use App\Exception\ResponseException;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -30,19 +31,19 @@ class UserService
     public function validateNewUser(array $data): void
     {
         if (!isset($data['name']) || !isset($data['email']) || !isset($data['password'])) {
-            throw new \Exception('Missing parameters', Response::HTTP_BAD_REQUEST);
+            throw new ResponseException('Missing parameters', Response::HTTP_BAD_REQUEST);
         }
 
         $email = $data['email'];
         $cleanEmail = filter_var($email,FILTER_SANITIZE_EMAIL);
 
         if (!$email == $cleanEmail || !filter_var($email,FILTER_VALIDATE_EMAIL)){
-            throw new \Exception('Invalid email', Response::HTTP_BAD_REQUEST);
+            throw new ResponseException('Invalid email', Response::HTTP_BAD_REQUEST);
         }
 
         $user = $this->userRepository->findOneBy(['email' => $email]);
         if ($user) {
-            throw new \Exception('Email already exists', Response::HTTP_BAD_REQUEST);
+            throw new ResponseException('Email already exists', Response::HTTP_BAD_REQUEST);
         }
         
         $password = $data['password'];
@@ -52,7 +53,7 @@ class UserService
         $specialChars = preg_match('@[^\w]@', $password);
 
         if(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($password) < 8) {
-            throw new \Exception('Invalid password', Response::HTTP_BAD_REQUEST);
+            throw new ResponseException('Invalid password', Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -61,11 +62,11 @@ class UserService
         $this->validateLogin($data);
         $user = $this->userRepository->findOneBy(['email' => $data['email']]);
         if (!$user) {
-            throw new \Exception('User not found', Response::HTTP_NOT_FOUND);
+            throw new ResponseException('User not found', Response::HTTP_NOT_FOUND);
         }
 
         if (!password_verify($data['password'], $user->getPassword())) {
-            throw new \Exception('Invalid password', Response::HTTP_BAD_REQUEST);
+            throw new ResponseException('Invalid password', Response::HTTP_BAD_REQUEST);
         }
 
         return $user;
@@ -74,7 +75,7 @@ class UserService
     public function validateLogin(array $data): void
     {
         if (!isset($data['email']) || !isset($data['password'])) {
-            throw new \Exception('Missing parameters', Response::HTTP_BAD_REQUEST);
+            throw new ResponseException('Missing parameters', Response::HTTP_BAD_REQUEST);
         }
     }
 }
