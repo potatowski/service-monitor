@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Registry;
 use App\Entity\Route;
+use App\Exception\ResponseException;
 use App\Repository\MessageRepository;
 use App\Repository\RegistryRepository;
 
@@ -37,7 +38,7 @@ class RegistryService
             $message = $this->messageRepository->findOneBy(['identifier' => $data['message']]);
 
             if (is_null($message)) {
-                throw new \Exception('Message not found');
+                throw new ResponseException('Message not found');
             }
 
             $registry->setMessage($message);
@@ -45,6 +46,7 @@ class RegistryService
 
             return $registry;
         } catch (\Exception $e) {
+            if ($e instanceof ResponseException) throw $e;
             return null;
         }
     }

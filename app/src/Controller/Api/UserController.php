@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use App\Exception\ResponseException;
 use App\Service\UserService;
 use App\Traiter\HttpStatusCodeExceptionTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,6 +28,7 @@ class UserController extends AbstractController
 
             return $this->json(['user' => $user->getId()], Response::HTTP_CREATED);
         } catch(\Exception $e) {
+            if ($e instanceof ResponseException) return $e->getResponse();
             $code = HttpStatusCodeExceptionTrait::getHttpStatusCode($e->getCode());
             return $this->json(['error' => $e->getMessage()], $code);
         }

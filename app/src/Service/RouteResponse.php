@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Message;
+use App\Exception\ResponseException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
@@ -101,7 +102,7 @@ class RouteResponse
     public function setMessage(string $message): void
     {
         if (!in_array($message, [Message::MESSAGE_FAILED, Message::MESSAGE_LIMITED, Message::MESSAGE_SUCESS])) {
-            throw new \Exception('Invalid message');
+            throw new ResponseException('Invalid message');
         }
 
         $this->message = $message;
